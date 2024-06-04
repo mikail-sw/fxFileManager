@@ -3,6 +3,6 @@ import gui
 
 root = tk.Tk()
 root.title("fxFileManager")
-gui.create_main_window(root)
+gui.create_window(root)
 
 root.mainloop()
