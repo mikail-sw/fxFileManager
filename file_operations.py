@@ -7,15 +7,15 @@ import gui
 def browse_directory():
     directory = filedialog.askdirectory()
     if directory:
-        gui.path_input.delete(0, tk.END)
-        gui.path_input.insert(0, directory)
+        gui.path_entry.delete(0, tk.END)
+        gui.path_entry.insert(0, directory)
 
 def filter_files(files):
     if not gui.is_filtered.get():
         return files
 
-    type_filter = gui.type_filter_input.get().lower()
-    include_filter = gui.include_filter_input.get().lower()
+    type_filter = gui.type_filter_entry.get().lower()
+    include_filter = gui.include_filter_entry.get().lower()
 
     filtered = []
     for file in files:
@@ -25,7 +25,7 @@ def filter_files(files):
     return filtered
 
 def rename():
-    directory = gui.path_input.get()
+    directory = gui.path_entry.get()
     rename_option = gui.rename_var.get()
 
     if not directory:
@@ -35,7 +35,7 @@ def rename():
     entries = [e for e in gui.rename_fields_frame.winfo_children() if isinstance(e, ttk.Entry)]
 
     if rename_option == "Remove":
-        if not any([gui.remove_letters.get(), gui.remove_numbers.get(), gui.remove_special.get(), gui.specific_text_entry.get().strip()]):
+        if not any([gui.remove_letters.get(), gui.remove_numbers.get(), gui.remove_specials.get(), gui.remove_entry.get().strip()]):
             messagebox.showwarning("Warning", "Please select at least one checkbox or fill in the Specific Text field.")
             return
     else:
@@ -70,12 +70,12 @@ def rename():
                 chars_to_remove += string.ascii_letters
             if gui.remove_numbers.get():
                 chars_to_remove += string.digits
-            if gui.remove_special.get():
+            if gui.remove_specials.get():
                 chars_to_remove += string.punctuation.replace("_", "")  # exclude underscores
             
             new_name = root_name.translate(str.maketrans('', '', chars_to_remove))
-            if gui.specific_text_entry.get().strip():  # check if input is entered
-                new_name = new_name.replace(gui.specific_text_entry.get().strip(), '', 1)  # remove input (once)
+            if gui.remove_entry.get().strip():  # check if input is entered
+                new_name = new_name.replace(gui.remove_entry.get().strip(), '', 1)  # remove input (once)
 
             # check if filename would be empty
             if not new_name:
