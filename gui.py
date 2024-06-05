@@ -6,56 +6,32 @@ def create_window(root):
     root.geometry("900x450")
     root.resizable(False, False)
     root.grid_rowconfigure(0, weight=1)
-    root.grid_columnconfigure(0, weight=2)
-    root.grid_columnconfigure(1, weight=6)
+    root.grid_columnconfigure(0, weight=2, uniform="a")
+    root.grid_columnconfigure(1, weight=6, uniform="a")
+
+    style_config()
 
     create_sidebar(root)
     create_main(root)
 
 def create_sidebar(root):
-    global rename_tabs, rename_options
-
     sidebar_frame = ttk.Frame(root)
     sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
     sidebar_frame.grid_rowconfigure(4, weight=1)
 
-    style = ttk.Style()
-    style.configure("Main.TFrame", background="grey")
-    style.layout("TNotebook", [("Notebook.tab", {"sticky": "nswe"})])
-    style.configure("TNotebook.Tab", padding=5)
-    style.configure("Custom.TCheckbutton", background="grey")
+    create_tabs(sidebar_frame)
 
-    # tabs
-    notebook = ttk.Notebook(sidebar_frame, style="TNotebook")
-    notebook.grid(row=0, column=0, sticky="nsew")
-    rename_tabs = {}  
-    rename_options = ["Rename", "Replace", "Add", "Remove"]
-    for option in rename_options:
-        tab_frame = ttk.Frame(notebook, padding=(15, 35, 0, 0))
-        notebook.add(tab_frame, text=option)
-        rename_tabs[option] = tab_frame
-
-    notebook.bind("<<NotebookTabChanged>>", on_tab_change)
-
-    # submit button
+    # submit
     rename_button = ttk.Button(sidebar_frame, text="Submit", command=file_operations.rename)
     rename_button.grid(row=6, column=0, columnspan=2, pady=20, sticky="s")
 
 def create_main(root):
-    global file_list
-
     main_frame = ttk.Frame(root, style="Main.TFrame")
     main_frame.grid(row=0, column=1, sticky="nsew")
 
     create_path_section(main_frame)
     create_filter_section(main_frame)
-
-    # overview
-    file_list = tk.Text(main_frame, wrap="word", padx=10, pady=10)
-    file_list.grid(row=2, column=0, columnspan=7, padx=(10, 30), pady=10, sticky="w")
-    file_list.tag_configure("center", justify="center")
-    file_list.tag_configure("line", spacing3=5)
-    main_frame.grid_rowconfigure(2, weight=1)
+    create_overview_section(main_frame)
 
     file_operations.update_file_list()
 
@@ -99,6 +75,21 @@ def on_tab_change(event):
         remove_specials = tk.BooleanVar(value=False)
         ttk.Checkbutton(rename_tabs[current_tab], text="Special Characters (all)", variable=remove_specials).grid(row=4, column=0, pady=3, sticky="w")
 
+def create_tabs(root):
+    global rename_tabs, rename_options
+    
+    notebook = ttk.Notebook(root, style="TNotebook")
+    notebook.grid(row=0, column=0, sticky="nsew")
+    
+    rename_tabs = {}  
+    rename_options = ["Rename", "Replace", "Add", "Remove"]
+    for option in rename_options:
+        tab_frame = ttk.Frame(notebook, padding=(15, 35, 0, 0))
+        notebook.add(tab_frame, text=option)
+        rename_tabs[option] = tab_frame
+
+    notebook.bind("<<NotebookTabChanged>>", on_tab_change)
+
 def create_path_section(root):
     global path_entry
 
@@ -119,3 +110,19 @@ def create_filter_section(root):
     ttk.Label(root, text="Includes:", background="grey", foreground="white").grid(row=1, column=4, padx=5, sticky="w")
     include_filter_entry = ttk.Entry(root, width=30, state="disabled")
     include_filter_entry.grid(row=1, column=5, padx=5, sticky="w")
+
+def create_overview_section(root):
+    global file_list
+
+    file_list = tk.Text(root, wrap="word", padx=10, pady=10)
+    file_list.grid(row=2, column=0, columnspan=7, padx=(10, 30), pady=10, sticky="w")
+    file_list.tag_configure("center", justify="center")
+    file_list.tag_configure("line", spacing3=5)
+    root.grid_rowconfigure(2, weight=1)
+
+def style_config():
+    style = ttk.Style()
+    style.configure("Main.TFrame", background="grey")
+    style.layout("TNotebook", [("Notebook.tab", {"sticky": "nswe"})])
+    style.configure("TNotebook.Tab", padding=5)
+    style.configure("Custom.TCheckbutton", background="grey")
