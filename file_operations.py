@@ -9,6 +9,7 @@ def browse_directory():
     if directory:
         gui.path_entry.delete(0, tk.END)
         gui.path_entry.insert(0, directory)
+        update_file_list()
 
 def filter_files(files):
     if not gui.is_filtered.get():
@@ -26,16 +27,27 @@ def filter_files(files):
 
 def rename():
     directory = gui.path_entry.get()
-    rename_option = gui.rename_var.get()
+    rename_option = gui.current_tab
+    current_tab_frame = gui.rename_tabs[rename_option]
 
     if not directory:
         messagebox.showwarning("Warning", "Please select a directory.")
         return
 
-    entries = [e for e in gui.rename_fields_frame.winfo_children() if isinstance(e, ttk.Entry)]
+    entries = []
+
+    for widget in current_tab_frame.winfo_children():
+        if isinstance(widget, ttk.Entry):
+            entries.append(widget)
+        elif isinstance(widget, ttk.Checkbutton) and rename_option == "Remove":
+            if widget.instate(["selected"]): 
+                entries.append(widget)
 
     if rename_option == "Remove":
-        if not any([gui.remove_letters.get(), gui.remove_numbers.get(), gui.remove_specials.get(), gui.remove_entry.get().strip()]):
+        if (
+            not any(entry.get().strip() for entry in entries if isinstance(entry, ttk.Entry)) and 
+            not any(entry.instate(["selected"]) for entry in entries if isinstance(entry, ttk.Checkbutton))
+        ):
             messagebox.showwarning("Warning", "Please select at least one checkbox or fill in the Specific Text field.")
             return
     else:
@@ -97,3 +109,25 @@ def rename():
         except OSError as e:
             messagebox.showerror("Error", f"An error occurred while renaming: {e}")
             return
+    update_file_list()
+
+def update_file_list():
+    directory = gui.path_entry.get()
+    gui.file_list.config(state="normal")
+    gui.file_list.delete("1.0", tk.END)
+
+    if not directory or not os.path.isdir(directory):
+        gui.file_list.insert(tk.END, "Please select a path", "center")
+        gui.file_list.config(state="disabled")
+        return
+
+    files = os.listdir(directory)
+    filtered_files = filter_files(files)
+
+    if filtered_files:
+        for file in filtered_files:
+            gui.file_list.insert(tk.END, f"- {os.path.relpath(os.path.join(directory, file), directory)}\n", "line")
+    else:
+        gui.file_list.insert(tk.END, "No files found", "center")
+
+    gui.file_list.config(state="disabled")
