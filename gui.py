@@ -99,16 +99,26 @@ def create_path_section(root):
     ttk.Button(root, text="Browse", command=file_operations.browse_directory, style="Custom.TButton").grid(row=0, column=6,padx=(10,20), pady=7, sticky="w")
 
 def create_filter_section(root):
-    global type_filter_entry, include_filter_entry, is_filtered
+    global type_filter_entry, include_filter_entry, is_filtered, type_filter_var, include_filter_var
 
     ttk.Label(root, text="Filter", background="grey", foreground="white").grid(row=1, column=0, padx=(10,5), pady=5, sticky="w")
     is_filtered = tk.BooleanVar()
+    is_filtered.trace_add("write", lambda *args: file_operations.update_file_list())
+
     ttk.Checkbutton(root, variable=is_filtered, command=toggle_filter, style="Custom.TCheckbutton").grid(row=1, column=1, padx=5, sticky="w")
+
+    type_filter_var = tk.StringVar()
+    type_filter_var.trace_add("write", lambda *args: file_operations.update_file_list())
+
     ttk.Label(root, text="Type:", background="grey", foreground="white").grid(row=1, column=2, padx=5, sticky="w")
-    type_filter_entry = ttk.Entry(root, width=15, state="disabled")
+    type_filter_entry = ttk.Entry(root, width=15, state="disabled", textvariable=type_filter_var)
     type_filter_entry.grid(row=1, column=3, padx=5, sticky="w")
+
+    include_filter_var = tk.StringVar()
+    include_filter_var.trace_add("write", lambda *args: file_operations.update_file_list())
+
     ttk.Label(root, text="Includes:", background="grey", foreground="white").grid(row=1, column=4, padx=5, sticky="w")
-    include_filter_entry = ttk.Entry(root, width=30, state="disabled")
+    include_filter_entry = ttk.Entry(root, width=30, state="disabled", textvariable=include_filter_var)
     include_filter_entry.grid(row=1, column=5, padx=5, sticky="w")
 
 def create_overview_section(root):

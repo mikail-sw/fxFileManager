@@ -58,6 +58,15 @@ def rename():
     files = os.listdir(directory)
     filtered_files = filter_files(files)
 
+    # confirmation on >18 file changes
+    if len(filtered_files) > 18:
+        confirm = messagebox.askyesno(
+            "Confirmation",
+            f"{len(filtered_files)} files are going to be changed.\n\nDo you want to proceed?"
+        )
+        if not confirm:
+            return
+
     renames = []  # to check for duplicates
     for i, file in enumerate(filtered_files):
         old_path = os.path.join(directory, file)
