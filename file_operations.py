@@ -61,6 +61,11 @@ def rename():
     renames = []  # to check for duplicates
     for i, file in enumerate(filtered_files):
         old_path = os.path.join(directory, file)
+
+        # check if file (not directory)
+        if not os.path.isfile(old_path):
+            continue
+
         root_name, ext = os.path.splitext(file)
 
         if rename_option == "Rename":
@@ -121,7 +126,7 @@ def update_file_list():
         gui.file_list.config(state="disabled")
         return
 
-    files = os.listdir(directory)
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))] # filter out directories
     filtered_files = filter_files(files)
 
     if filtered_files:
