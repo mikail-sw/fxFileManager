@@ -7,15 +7,16 @@ import gui
 def browse_directory():
     directory = filedialog.askdirectory()
     if directory:
-        gui.path_input.delete(0, tk.END)
-        gui.path_input.insert(0, directory)
+        gui.path_entry.delete(0, tk.END)
+        gui.path_entry.insert(0, directory)
+        update_file_list()
 
 def filter_files(files):
     if not gui.is_filtered.get():
         return files
 
-    type_filter = gui.type_filter_input.get().lower()
-    include_filter = gui.include_filter_input.get().lower()
+    type_filter = gui.type_filter_entry.get().lower()
+    include_filter = gui.include_filter_entry.get().lower()
 
     filtered = []
     for file in files:
@@ -25,17 +26,28 @@ def filter_files(files):
     return filtered
 
 def rename():
-    directory = gui.path_input.get()
-    rename_option = gui.rename_var.get()
+    directory = gui.path_entry.get()
+    rename_option = gui.current_tab
+    current_tab_frame = gui.rename_tabs[rename_option]
 
     if not directory:
         messagebox.showwarning("Warning", "Please select a directory.")
         return
 
-    entries = [e for e in gui.rename_fields_frame.winfo_children() if isinstance(e, ttk.Entry)]
+    entries = []
+
+    for widget in current_tab_frame.winfo_children():
+        if isinstance(widget, ttk.Entry):
+            entries.append(widget)
+        elif isinstance(widget, ttk.Checkbutton) and rename_option == "Remove":
+            if widget.instate(["selected"]): 
+                entries.append(widget)
 
     if rename_option == "Remove":
-        if not any([gui.remove_letters.get(), gui.remove_numbers.get(), gui.remove_special.get(), gui.specific_text_entry.get().strip()]):
+        if (
+            not any(entry.get().strip() for entry in entries if isinstance(entry, ttk.Entry)) and 
+            not any(entry.instate(["selected"]) for entry in entries if isinstance(entry, ttk.Checkbutton))
+        ):
             messagebox.showwarning("Warning", "Please select at least one checkbox or fill in the Specific Text field.")
             return
     else:
@@ -70,12 +82,12 @@ def rename():
                 chars_to_remove += string.ascii_letters
             if gui.remove_numbers.get():
                 chars_to_remove += string.digits
-            if gui.remove_special.get():
+            if gui.remove_specials.get():
                 chars_to_remove += string.punctuation.replace("_", "")  # exclude underscores
             
             new_name = root_name.translate(str.maketrans('', '', chars_to_remove))
-            if gui.specific_text_entry.get().strip():  # check if input is entered
-                new_name = new_name.replace(gui.specific_text_entry.get().strip(), '', 1)  # remove input (once)
+            if gui.remove_entry.get().strip():  # check if input is entered
+                new_name = new_name.replace(gui.remove_entry.get().strip(), '', 1)  # remove input (once)
 
             # check if filename would be empty
             if not new_name:
@@ -97,3 +109,25 @@ def rename():
         except OSError as e:
             messagebox.showerror("Error", f"An error occurred while renaming: {e}")
             return
+    update_file_list()
+
+def update_file_list():
+    directory = gui.path_entry.get()
+    gui.file_list.config(state="normal")
+    gui.file_list.delete("1.0", tk.END)
+
+    if not directory or not os.path.isdir(directory):
+        gui.file_list.insert(tk.END, "Please select a path", "center")
+        gui.file_list.config(state="disabled")
+        return
+
+    files = os.listdir(directory)
+    filtered_files = filter_files(files)
+
+    if filtered_files:
+        for file in filtered_files:
+            gui.file_list.insert(tk.END, f"- {os.path.relpath(os.path.join(directory, file), directory)}\n", "line")
+    else:
+        gui.file_list.insert(tk.END, "No files found", "center")
+
+    gui.file_list.config(state="disabled")
