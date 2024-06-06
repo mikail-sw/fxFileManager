@@ -138,12 +138,78 @@ def update_file_list():
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))] # filter out directories
     filtered_files = filter_files(files)
 
+    rename_option = gui.current_tab
+    rename_tab_frame = gui.rename_tabs[rename_option]
+
+    entries = []
+    for widget in rename_tab_frame.winfo_children():
+        if isinstance(widget, ttk.Entry):
+            entries.append(widget)
+        elif isinstance(widget, ttk.Checkbutton) and rename_option == "Remove":
+            if widget.instate(["selected"]):
+                entries.append(widget)
+
+    seen_files = set()
     if filtered_files:
-        for file in filtered_files:
-            file_label = tk.Label(gui.file_list, image=gui.file_icon, text=f" {os.path.relpath(os.path.join(directory, file), directory)}", compound="left", background="white")
-            gui.file_list.window_create(tk.END, window=file_label)
+        for i, file in enumerate(filtered_files):
+            root_name, ext = os.path.splitext(file)
+            new_name = preview_name(root_name, ext, entries, i, filtered_files)
+
+            before_label = tk.Label(gui.file_list, image=gui.file_icon, text=f" {file} ", compound="left", background="white")
+            gui.file_list.window_create(tk.END, window=before_label)
+
+            if new_name and new_name != file and all(hasattr(e, 'get') and e.get().strip() for e in entries):
+                error_occurred = (not new_name or new_name.lower() in seen_files)
+
+                after_label_color = "red" if error_occurred else "blue"
+                after_label_text = f" ->   {new_name}" if new_name else " ->   error"
+                after_label = tk.Label(gui.file_list, text=after_label_text, foreground=after_label_color, background="white")
+                gui.file_list.window_create(tk.END, window=after_label)
+
             gui.file_list.insert(tk.END, "\n", "line")
+
+            if new_name:
+                seen_files.add(new_name.lower())
     else:
         gui.file_list.insert(tk.END, "\n\n\n\n\n\n\n\nNo files found", "center")
 
     gui.file_list.config(state="disabled")
+
+def preview_name(root_name, ext, entries, i, filtered_files):
+    rename_option = gui.current_tab
+
+    if rename_option == "Rename":
+        return f"{entries[0].get().strip()}{f'_{i+1}' if len(filtered_files) > 1 else ''}{ext}"
+
+    elif rename_option == "Replace":
+        old_value = entries[0].get().strip()
+        new_value = entries[1].get().strip()
+        if not any(old_value in f.lower() for f in filtered_files):
+            return None  # no change if old_value is not found
+        return f"{root_name.lower().replace(old_value.lower(), new_value, 1)}{ext}"
+
+    elif rename_option == "Add":
+        value_to_add = entries[0].get().strip()
+        position = gui.position_var.get()
+        return f"{value_to_add}{root_name}{ext}" if position == "Start" else f"{root_name}{value_to_add}{ext}"
+
+    elif rename_option == "Remove":
+        chars_to_remove = ""
+        if gui.remove_letters.get():
+            chars_to_remove += string.ascii_letters
+        if gui.remove_numbers.get():
+            chars_to_remove += string.digits
+        if gui.remove_specials.get():
+            chars_to_remove += string.punctuation.replace("_", "") 
+
+        new_name = root_name.translate(str.maketrans('', '', chars_to_remove))
+        if gui.remove_entry.get().strip():
+            new_name = new_name.replace(gui.remove_entry.get().strip(), '', 1)
+
+        # handle empty
+        if not new_name:
+            return None
+        return new_name + ext
+
+    else:
+        return None
