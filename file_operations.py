@@ -12,7 +12,7 @@ def browse_directory():
         update_file_list()
 
 def filter_files(files):
-    if not gui.is_filtered.get():
+    if not gui.type_filter_var.get() and gui.include_filter_var.get():
         return files
 
     type_filter = gui.type_filter_entry.get().lower()
@@ -131,7 +131,7 @@ def update_file_list():
     gui.file_list.delete("1.0", tk.END)
 
     if not directory or not os.path.isdir(directory):
-        gui.file_list.insert(tk.END, "Please select a path", "center")
+        gui.file_list.insert(tk.END, "\n\n\n\n\n\n\n\nPlease select a path", "center")
         gui.file_list.config(state="disabled")
         return
 
@@ -140,8 +140,10 @@ def update_file_list():
 
     if filtered_files:
         for file in filtered_files:
-            gui.file_list.insert(tk.END, f"- {os.path.relpath(os.path.join(directory, file), directory)}\n", "line")
+            file_label = tk.Label(gui.file_list, image=gui.file_icon, text=f" {os.path.relpath(os.path.join(directory, file), directory)}", compound="left", background="white")
+            gui.file_list.window_create(tk.END, window=file_label)
+            gui.file_list.insert(tk.END, "\n", "line")
     else:
-        gui.file_list.insert(tk.END, "No files found", "center")
+        gui.file_list.insert(tk.END, "\n\n\n\n\n\n\n\nNo files found", "center")
 
     gui.file_list.config(state="disabled")
