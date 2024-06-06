@@ -3,7 +3,7 @@ from tkinter import ttk
 import file_operations
 
 def create_window(root):
-    root.geometry("900x450")
+    root.geometry("910x450")
     root.resizable(False, False)
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=2, uniform="a")
@@ -39,6 +39,9 @@ def create_entry_field(parent_frame, label_text, width=30, row=0, column=0):
     ttk.Label(parent_frame, text=label_text).grid(row=row, column=column, pady=(15, 0), sticky="w")
     entry = ttk.Entry(parent_frame, width=width)
     entry.grid(row=row + 1, column=column, pady=5, sticky="w")
+
+    entry.bind("<KeyRelease>", lambda event: file_operations.update_file_list()) 
+
     return entry
 
 def on_tab_change(event):
@@ -46,21 +49,24 @@ def on_tab_change(event):
 
     current_tab = event.widget.tab(event.widget.select(), "text") if event else rename_options[0]
 
-    # Clear existing fields in the current tab
     for widget in rename_tabs[current_tab].winfo_children():
         widget.destroy()
 
-    # Create the appropriate fields based on the selected tab
     if current_tab == "Rename":
         create_entry_field(rename_tabs[current_tab], "Name:")
+
     elif current_tab == "Replace":
         create_entry_field(rename_tabs[current_tab], "Replace:")
         create_entry_field(rename_tabs[current_tab], "With:", row=2,)
+
     elif current_tab == "Add":
         create_entry_field(rename_tabs[current_tab], "Name:")
         ttk.Label(rename_tabs[current_tab], text="At:").grid(row=2, column=0, pady=(15, 0), sticky="w")
         position_var = tk.StringVar(value="Start")
         ttk.Combobox(rename_tabs[current_tab], textvariable=position_var, values=["Start", "End"], state="readonly", width=27).grid(row=3, column=0, pady=5, sticky="w")
+        
+        position_var.trace_add("write", lambda *args: file_operations.update_file_list())
+
     elif current_tab == "Remove":
         remove_entry = create_entry_field(rename_tabs[current_tab], "Remove:")
         remove_letters = tk.BooleanVar(value=False)
@@ -69,6 +75,11 @@ def on_tab_change(event):
         ttk.Checkbutton(rename_tabs[current_tab], text="Numbers (all)", variable=remove_numbers).grid(row=3, column=0, pady=3, sticky="w")
         remove_specials = tk.BooleanVar(value=False)
         ttk.Checkbutton(rename_tabs[current_tab], text="Special Characters (all)", variable=remove_specials).grid(row=4, column=0, pady=3, sticky="w")
+
+        for var in [remove_letters, remove_numbers, remove_specials]:
+            var.trace_add("write", lambda *args: file_operations.update_file_list())
+
+    file_operations.update_file_list()
 
 def create_tabs(root):
     global rename_tabs, rename_options
@@ -115,7 +126,7 @@ def create_filter_section(root):
 def create_overview_section(root):
     global file_list
 
-    file_list = tk.Text(root, wrap="word", padx=10, pady=10)
+    file_list = tk.Text(root, wrap="word", padx=10, pady=10, background="white", foreground="black")
     file_list.grid(row=2, column=0, columnspan=7, padx=10, pady=10, sticky="w")
     file_list.tag_configure("center", justify="center")
     file_list.tag_configure("line", spacing3=5)
