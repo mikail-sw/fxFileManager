@@ -12,18 +12,14 @@ def browse_directory():
         update_file_list()
 
 def filter_files(files):
-    if not gui.type_filter_var.get() and gui.include_filter_var.get():
-        return files
-
-    type_filter = gui.type_filter_entry.get().lower()
+    type_filter = gui.type_filter_entry.get().lower().split(';') if gui.type_filter_var.get() else []
     include_filter = gui.include_filter_entry.get().lower()
 
-    filtered = []
-    for file in files:
-        _, ext = os.path.splitext(file)
-        if (not type_filter or ext.lstrip(".") == type_filter) and (not include_filter or include_filter in file.lower()):
-            filtered.append(file)
-    return filtered
+    if not type_filter and not include_filter:
+        return files
+
+    return [file for file in files
+        if (not type_filter or any(os.path.splitext(file)[1].lstrip(".") == f.strip() for f in type_filter)) and (not include_filter or include_filter in file.lower())]
 
 def rename():
     directory = gui.path_entry.get()
@@ -79,17 +75,20 @@ def rename():
 
         if rename_option == "Rename":
             new_name = f"{entries[0].get().strip()}{f'_{i+1}' if len(filtered_files) > 1 else ''}{ext}"
+
         elif rename_option == "Replace":
             old_value = entries[0].get().strip()
             new_value = entries[1].get().strip()
             if not any(old_value in f.lower() for f in filtered_files):
                 messagebox.showwarning("Warning", f"Value '{old_value}' not found in any filenames.")
                 return
-            new_name = f"{root_name.lower().replace(old_value.lower(), new_value, 1)}{ext}" 
+            new_name = f"{root_name.lower().replace(old_value.lower(), new_value, 1)}{ext}"
+            
         elif rename_option == "Add":
             value_to_add = entries[0].get().strip()
             position = gui.position_var.get()
             new_name = f"{value_to_add}{root_name}{ext}" if position == "Start" else f"{root_name}{value_to_add}{ext}"
+
         elif rename_option == "Remove":
             chars_to_remove = ""
             if gui.remove_letters.get():
