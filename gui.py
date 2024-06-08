@@ -14,7 +14,7 @@ def create_window(root):
     create_main(root)
 
 def create_sidebar(root):
-    sidebar_frame = ttk.Frame(root, style="Main.TFrame")
+    sidebar_frame = ttk.Frame(root)
     sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
     sidebar_frame.grid_rowconfigure(4, weight=1)
 
