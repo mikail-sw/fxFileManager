@@ -3,11 +3,10 @@ from tkinter import ttk
 import file_operations
 
 def create_window(root):
-    root.geometry("910x450")
     root.resizable(False, False)
     root.grid_rowconfigure(0, weight=1)
-    root.grid_columnconfigure(0, weight=2, uniform="a")
-    root.grid_columnconfigure(1, weight=6, uniform="a")
+    root.grid_columnconfigure(0, weight=2)
+    root.grid_columnconfigure(1, weight=6)
 
     style_config()
 
@@ -127,7 +126,7 @@ def create_overview_section(root):
     global file_list
 
     file_list = tk.Text(root, wrap="word", padx=10, pady=10, background="white", foreground="black")
-    file_list.grid(row=2, column=0, columnspan=7, padx=10, pady=10, sticky="w")
+    file_list.grid(row=2, column=0, columnspan=7, padx=10, pady=10, sticky="nswe")
     file_list.tag_configure("center", justify="center")
     file_list.tag_configure("line", spacing3=5)
     root.grid_rowconfigure(2, weight=1)
