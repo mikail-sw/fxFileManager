@@ -154,8 +154,8 @@ def update_file_list():
             root_name, ext = os.path.splitext(file)
             new_name = preview_name(root_name, ext, entries, i, filtered_files)
 
-            gui.file_list.image_create(tk.END, image=gui.file_icon)
-            gui.file_list.insert(tk.END, f"  {file}  ")
+            before_label = tk.Label(gui.file_list,image=gui.file_icon, text=f"  {file}  ", compound="left", foreground="black", background="white")
+            gui.file_list.window_create(tk.END, window=before_label)
 
             if new_name and new_name != file and all(hasattr(e, 'get') and e.get().strip() for e in entries):
                 error_occurred = (not new_name or new_name.lower() in seen_files)
