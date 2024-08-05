@@ -79,10 +79,10 @@ def rename():
         elif rename_option == "Replace":
             old_value = entries[0].get().strip()
             new_value = entries[1].get().strip()
-            if not any(old_value in f.lower() for f in filtered_files):
+            if not any(old_value in f for f in filtered_files):
                 messagebox.showwarning("Warning", f"Value '{old_value}' not found in any filenames.")
                 return
-            new_name = f"{root_name.lower().replace(old_value.lower(), new_value, 1)}{ext}"
+            new_name = f"{root_name.replace(old_value, new_value, 1)}{ext}"
             
         elif rename_option == "Add":
             value_to_add = entries[0].get().strip()
@@ -158,7 +158,7 @@ def update_file_list():
             gui.file_list.window_create(tk.END, window=before_label)
 
             if new_name and new_name != file and all(hasattr(e, 'get') and e.get().strip() for e in entries):
-                error_occurred = (not new_name or new_name.lower() in seen_files)
+                error_occurred = (not new_name or new_name in seen_files)
 
                 after_label_color = "red" if error_occurred else "blue"
                 after_label_text = f" ->   {new_name}" if new_name else " ->   error"
@@ -168,7 +168,7 @@ def update_file_list():
             gui.file_list.insert(tk.END, "\n", "line")
 
             if new_name:
-                seen_files.add(new_name.lower())
+                seen_files.add(new_name)
     else:
         gui.file_list.insert(tk.END, "\n\n\n\n\n\n\n\nNo files found", "center")
 
@@ -183,9 +183,9 @@ def preview_name(root_name, ext, entries, i, filtered_files):
     elif rename_option == "Replace":
         old_value = entries[0].get().strip()
         new_value = entries[1].get().strip()
-        if not any(old_value in f.lower() for f in filtered_files):
+        if not any(old_value in f for f in filtered_files):
             return None  # no change if old_value is not found
-        return f"{root_name.lower().replace(old_value.lower(), new_value, 1)}{ext}"
+        return f"{root_name.replace(old_value, new_value, 1)}{ext}"
 
     elif rename_option == "Add":
         value_to_add = entries[0].get().strip()
