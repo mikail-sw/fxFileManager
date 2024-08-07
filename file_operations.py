@@ -1,9 +1,8 @@
 import os
-import string
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import gui
 from file import File
+import gui
 
 def browse_directory():
     directory = filedialog.askdirectory()
@@ -133,8 +132,11 @@ def update_file_list():
             )
             gui.file_list.window_create(tk.END, window=before_label)
 
-            if new_name and new_name != file_obj.name and all(
-                hasattr(e, "get") and e.get().strip() for e in entries
+            if new_name and new_name != file_obj.name and (
+                all(hasattr(e, "get") and e.get().strip() for e in entries)
+                or (gui.remove_letters and gui.remove_letters.get())
+                or (gui.remove_numbers and gui.remove_numbers.get())
+                or (gui.remove_specials and gui.remove_specials.get())
             ):
                 error_occurred = not new_name or new_name in seen_files
 
@@ -172,9 +174,9 @@ def get_rename_params(rename_option, entries, filtered_files):
         rename_params["value_to_add"] = entries[0].get().strip()
         rename_params["position"] = gui.position_var.get()
     elif rename_option == "Remove":
+        rename_params["specific_text"] = gui.remove_entry.get().strip()
         rename_params["letters"] = gui.remove_letters.get()
         rename_params["numbers"] = gui.remove_numbers.get()
         rename_params["specials"] = gui.remove_specials.get()
-        rename_params["specific_text"] = gui.remove_entry.get().strip()
 
     return rename_params

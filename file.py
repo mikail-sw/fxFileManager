@@ -1,4 +1,5 @@
 import os
+import string
 
 class File:
     def __init__(self, path):
@@ -28,16 +29,15 @@ class File:
                 else f"{self.root_name}{value_to_add}"
             )
         elif rename_option == "Remove":
-            chars_to_remove = "".join(
-                c
-                for c, remove in rename_params.items()
-                if remove and c in ["letters", "numbers", "specials"]
-            )
-            if chars_to_remove:  # check if any characters are to be removed
-                new_root_name = self.root_name.translate(str.maketrans("", "", chars_to_remove))
             specific_text = rename_params.get("specific_text")
             if specific_text:
                 new_root_name = new_root_name.replace(specific_text, "", 1)
+            if rename_params.get("letters"):
+                new_root_name = new_root_name.translate(str.maketrans('', '', string.ascii_letters))
+            if rename_params.get("numbers"):
+                new_root_name = new_root_name.translate(str.maketrans('', '', string.digits))
+            if rename_params.get("specials"):
+                new_root_name = new_root_name.translate(str.maketrans('', '', string.punctuation.replace("_", "")))
 
         # check empty
         new_root_name = new_root_name if new_root_name else self.root_name 

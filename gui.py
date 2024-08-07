@@ -2,6 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 import file_operations
 
+remove_letters = None
+remove_numbers = None
+remove_specials = None
+remove_entry = None
+
 def create_window(root):
     root.resizable(False, False)
     root.grid_rowconfigure(0, weight=1)
@@ -75,6 +80,7 @@ def on_tab_change(event):
         remove_specials = tk.BooleanVar(value=False)
         ttk.Checkbutton(rename_tabs[current_tab], text="Special Characters (all)", variable=remove_specials).grid(row=4, column=0, pady=3, sticky="w")
 
+        # bind checkbox value changes
         for var in [remove_letters, remove_numbers, remove_specials]:
             var.trace_add("write", lambda *args: file_operations.update_file_list())
 
