@@ -77,7 +77,7 @@ Tired of manually managing files one by one? `fxFileManager` automates this tedi
 
 The tool includes checks for:
 - Empty or invalid input fields.
-- "Replace" value not found in filenames.
+- Replace value not found in filenames.
 - Renaming that would result in empty filenames.
 - Duplicate filenames after renaming.
 
