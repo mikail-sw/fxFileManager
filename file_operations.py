@@ -1,11 +1,12 @@
 import os
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+import ttkbootstrap as ttk
+from tkinter import messagebox, filedialog
 from file import File
 import gui
 
 def browse_directory():
-    directory = filedialog.askdirectory()
+    directory = tk.filedialog.askdirectory()
     if directory:
         gui.path_entry.delete(0, tk.END)
         gui.path_entry.insert(0, directory)
@@ -140,15 +141,14 @@ def update_file_list():
             ):
                 error_occurred = not new_name or new_name in seen_files
 
-                after_label_color = "red" if error_occurred else "blue"
+                after_label_color = "danger" if error_occurred else "primary"
                 after_label_text = (
                     f" ->   {new_name}" if new_name else " ->   error"
                 )
-                after_label = tk.Label(
+                after_label = ttk.Label(
                     gui.file_list,
                     text=after_label_text,
-                    foreground=after_label_color,
-                    background="white",
+                    bootstyle=after_label_color,
                 )
                 gui.file_list.window_create(tk.END, window=after_label)
 

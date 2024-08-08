@@ -1,7 +1,7 @@
-import tkinter as tk
+import ttkbootstrap as ttk
 import gui
 
-root = tk.Tk()
+root = ttk.Window(themename="cosmo")
 root.title("fxFileManager")
 gui.create_window(root)
 
