@@ -28,6 +28,10 @@ Tired of manually managing files one by one? `fxFileManager` automates this tedi
 1. **Prerequisites:**
    - Python 3.x installed
    - This repository cloned or downloaded
+   - ttkbootstrap installed
+     ```bash
+     python -m pip install ttkbootstrap
+     ```
    
 2. **Running the Application:**
    - **Open a terminal or command prompt.**
